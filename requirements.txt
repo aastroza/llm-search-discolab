@@ -1,7 +1,12 @@
 openai
-streamlit
 llama-index
 langchain
 python-dotenv
+fastapi
+uvicorn
+python-multipart
+ipykernel
 nltk
 modal
+psycopg2-binary
+pgvector
