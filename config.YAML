@@ -1,0 +1,9 @@
+chat_model: "gpt-3.5-turbo"
+embedding_model: "text-embedding-ada-002"
+temperature: 0.0
+chunk_size: 1024
+chunk_overlap: 0
+similarity_topn: 3
+streaming: True
+document1_id_default: 1
+document2_id_default: 2
