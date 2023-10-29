@@ -1,12 +1,15 @@
-openai
-llama-index
-langchain
 python-dotenv
-fastapi
-uvicorn
-python-multipart
+openai
+pydantic
 ipykernel
-nltk
-modal
-psycopg2-binary
-pgvector
+matplotlib
+langchain
+# llama-index
+# fastapi
+# uvicorn
+# python-multipart
+# ipykernel
+# nltk
+# modal
+# psycopg2-binary
+# pgvector
