@@ -1,15 +1,15 @@
 python-dotenv
 openai
 pydantic
+ipython==8.16.1
 ipykernel
 matplotlib
 langchain
-# llama-index
-# fastapi
-# uvicorn
-# python-multipart
-# ipykernel
-# nltk
-# modal
-# psycopg2-binary
-# pgvector
+tiktoken
+psycopg2-binary
+pgvector
+jinja2
+fastapi
+uvicorn
+python-multipart
+modal
