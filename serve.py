@@ -31,7 +31,11 @@ image = (
     .pip_install(
         "openai",
         "langchain",
-        "python-dotenv"
+        "python-dotenv",
+        "psycopg2-binary",
+        "pgvector",
+        "jinja2",
+        "tiktoken"
     )
 )
 
@@ -91,12 +95,11 @@ def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, docum
     response_final_1 = "".join(answer)
 
     yield "\n\n**[SOURCES DOCUMENT 1]**\n"
-    sources_idx_1 = set(re.findall(r'[\d]', response_final_1))
-    # if len(sources_idx_1) > 0:
-    #     for idx in sources_idx_1:
-    #         node = qe_result1["answer"].source_nodes[int(idx)-1]
-    #         [source, capitulo, articulo] = node.node.get_text().split('\n', 3)[0:3]
-    #         yield f'[{source.replace("Source ", "" ).replace(":", "")}] {capitulo}, {articulo}\n'
+    sources_idx_1 = sorted(set(re.findall(r'[\d]', response_final_1)))
+    if len(sources_idx_1) > 0:
+        for idx in sources_idx_1:
+            source = qe_result1["sources"][int(idx)-1]
+            yield f'[{idx}] {source}\n'
 
     yield "\n\n**[DOCUMENT 2]**\n"
     answer = []
@@ -106,12 +109,11 @@ def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, docum
     response_final_2 = "".join(answer)
 
     yield "\n\n**[SOURCES DOCUMENT 2]**\n"
-    sources_idx_2 = set(re.findall(r'[\d]', response_final_2))
-    # if len(sources_idx_2) > 0:
-    #     for idx in sources_idx_2:
-    #         node = qe_result2["answer"].source_nodes[int(idx)-1]
-    #         [source, capitulo, articulo] = node.node.get_text().split('\n', 3)[0:3]
-    #         yield f'[{source.replace("Source ", "" ).replace(":", "")}] {capitulo}, {articulo}\n'
+    sources_idx_2 = sorted(set(re.findall(r'[\d]', response_final_2)))
+    if len(sources_idx_2) > 0:
+        for idx in sources_idx_2:
+            source = qe_result1["sources"][int(idx)-1]
+            yield f'[{idx}] {source}\n'
     
     if len(sources_idx_1) + len(sources_idx_2) > 0:
 
@@ -128,7 +130,7 @@ def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, docum
                                     first_response=response_final_1,
                                     second_response=response_final_2,
                                     stream=True)
-        for answer_piece in response_final:
+        for answer_piece in response_final["answer"]:
             yield f'{{"content" : "{answer_piece}"}}\n'
     
     yield "\n\n**[END]**\n"
@@ -141,5 +143,5 @@ def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, docum
 )
 
 @asgi_app()
-def new_rag_discolab():
+def api():
     return app
