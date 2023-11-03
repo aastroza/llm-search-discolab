@@ -3,6 +3,8 @@ from pgvector.psycopg2 import register_vector
 import os
 import numpy as np
 import openai
+import time
+import re
 
 from rag.embed import get_embedding_model
 from rag.prompts import DOCUMENT_QA_USER_PROMPT_TEMPLATE, DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE, FINAL_RESPONSE_USER_PROMPT_TEMPLATE
@@ -99,7 +101,7 @@ class QueryAgent:
         )
 
         # Generate response
-        user_content = FINAL_RESPONSE_USER_PROMPT_TEMPLATE.render(context=context,
+        user_content = DOCUMENT_QA_USER_PROMPT_TEMPLATE.render(context=context,
                                                                 query=query
                                                             )
         answer = generate_response(
@@ -111,27 +113,30 @@ class QueryAgent:
             user_content=user_content[: self.context_length],
         )
 
-        user_refine_content = DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE.render(existing_answer=answer,
-                                                                            context=context,
-                                                                            query=query
-                                                                        )
+        # user_refine_content = DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE.render(existing_answer=answer,
+        #                                                                     context=context,
+        #                                                                     query=query
+        #                                                                 )
         
-        refined_answer = generate_response(
-            llm=self.llm,
-            temperature=self.temperature,
-            stream=stream,
-            system_content=self.system_content,
-            assistant_content=self.assistant_content,
-            user_content=user_refine_content[: self.context_length],
-        )
+        # refined_answer = generate_response(
+        #     llm=self.llm,
+        #     temperature=self.temperature,
+        #     stream=stream,
+        #     system_content=self.system_content,
+        #     assistant_content=self.assistant_content,
+        #     user_content=user_refine_content[: self.context_length],
+        # )
 
         # Result
         result = {
             "question": query,
             "sources": sources,
             "document_ids": document_ids,
-            "answer": refined_answer,
-            "llm": self.llm
+            #"answer": refined_answer,
+            "answer": answer,
+            "llm": self.llm,
+            "user_content": user_content,
+            #"user_refine_content": user_refine_content
         }
         return result
 
@@ -162,9 +167,9 @@ class ComparisonAgent:
     def __call__(self, query, first_response, second_response, stream=True):
 
         # Generate response
-        user_content = DOCUMENT_QA_USER_PROMPT_TEMPLATE.render(query=query,
-                                                               first_response=first_response,
-                                                               second_response=second_response)
+        user_content = FINAL_RESPONSE_USER_PROMPT_TEMPLATE .render(query=query,
+                                                               first_response=re.sub(r'\[\d+\]', '', first_response),
+                                                               second_response=re.sub(r'\[\d+\]', '', second_response))
         answer = generate_response(
             llm=self.llm,
             temperature=self.temperature,
@@ -178,6 +183,8 @@ class ComparisonAgent:
         result = {
             "question": query,
             "answer": answer,
-            "llm": self.llm
+            "llm": self.llm,
+            "user_content": user_content,
+            "system_content": self.system_content
         }
         return result

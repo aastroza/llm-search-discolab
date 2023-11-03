@@ -13,3 +13,5 @@ fastapi
 uvicorn
 python-multipart
 modal
+marvin==1.5.1
+pydantic-settings

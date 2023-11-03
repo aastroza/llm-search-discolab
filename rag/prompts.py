@@ -1,8 +1,9 @@
 from jinja2 import Template
 
-DOCUMENT_QA_SYSTEM_PROMPT = (
+DOCUMENT_QA_SYSTEM_PROMPT = Template(
 """
-Please provide an answer based solely on the provided sources. When referencing information from a source, cite the appropriate source(s) using their corresponding numbers. Every answer should include at least one source citation. Only cite a source when you are explicitly referencing it. If none of the sources are helpful, you should indicate that. For example:
+Please respond in {{language}}.
+Please provide an answer based solely on the provided sources. When referencing information from a source, cite the appropriate source(s) using their corresponding numbers enclosed within square brackets. Every answer should include at least one source citation. Only cite a source when you are explicitly referencing it. If none of the sources are helpful, you should indicate that. For example:
 Source 1:
 The sky is red in the evening and blue in the morning.
 Source 2:
@@ -23,9 +24,10 @@ Answer:
 """
 )
 
-DOCUMENT_QA_REFINE_SYSTEM_PROMPT = (
+DOCUMENT_QA_REFINE_SYSTEM_PROMPT = Template(
 """
-Please provide an answer based solely on the provided sources. When referencing information from a source, cite the appropriate source(s) using their corresponding numbers. Every answer should include at least one source citation. Only cite a source when you are explicitly referencing it. If none of the sources are helpful, you should indicate that. For example:
+Please respond in {{language}}.
+Please provide an answer based solely on the provided sources. When referencing information from a source, cite the appropriate source(s) using their corresponding numbers enclosed within square brackets. Every answer should include at least one source citation. Only cite a source when you are explicitly referencing it. If none of the sources are helpful, you should indicate that. For example:
 Source 1:
 The sky is red in the evening and blue in the morning.
 Source 2:
@@ -54,6 +56,8 @@ the differences of two constitutions.
 
 The first constitution is the current one, and the second one is a proposed one.
 Always refer to the first constitution as "{{document1_title}}" and the second one as "{{document2_title}}".
+
+Please respond in {{language}}.
 """
 )
 

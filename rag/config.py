@@ -27,3 +27,6 @@ CONSTITUCIONES = {
     "4": "Propuesta Bachelet 2016",
     "5": "Propuesta Constitucional 2023"
 }
+
+MARVIN_MODEL_NAME = 'openai/gpt-3.5-turbo'
+MARVIN_MODEL_TEMPERATURE = 0
