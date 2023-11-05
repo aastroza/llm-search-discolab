@@ -16,6 +16,7 @@ CONFIG = {
     "chunk_overlap": 0,
     "similarity_topn": 3,
     "streaming": True,
+    "refine": False,
     "document1_id_default": 1,
     "document2_id_default": 2
 }

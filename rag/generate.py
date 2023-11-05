@@ -8,6 +8,7 @@ import re
 
 from rag.embed import get_embedding_model
 from rag.prompts import DOCUMENT_QA_USER_PROMPT_TEMPLATE, DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE, FINAL_RESPONSE_USER_PROMPT_TEMPLATE
+from rag.config import CONFIG
 
 def get_sources_and_context(query, embedding_model, num_chunks=3, id_constitucion=1):
     embedding = np.array(embedding_model.embed_query(query))
@@ -113,31 +114,43 @@ class QueryAgent:
             user_content=user_content[: self.context_length],
         )
 
-        # user_refine_content = DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE.render(existing_answer=answer,
-        #                                                                     context=context,
-        #                                                                     query=query
-        #                                                                 )
-        
-        # refined_answer = generate_response(
-        #     llm=self.llm,
-        #     temperature=self.temperature,
-        #     stream=stream,
-        #     system_content=self.system_content,
-        #     assistant_content=self.assistant_content,
-        #     user_content=user_refine_content[: self.context_length],
-        # )
+        if CONFIG["refine"]:
 
-        # Result
-        result = {
-            "question": query,
-            "sources": sources,
-            "document_ids": document_ids,
-            #"answer": refined_answer,
-            "answer": answer,
-            "llm": self.llm,
-            "user_content": user_content,
-            #"user_refine_content": user_refine_content
-        }
+            user_refine_content = DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE.render(existing_answer=answer,
+                                                                                context=context,
+                                                                                query=query
+                                                                            )
+            
+            refined_answer = generate_response(
+                llm=self.llm,
+                temperature=self.temperature,
+                stream=stream,
+                system_content=self.system_content,
+                assistant_content=self.assistant_content,
+                user_content=user_refine_content[: self.context_length],
+            )
+            # Result
+            result = {
+                "question": query,
+                "sources": sources,
+                "document_ids": document_ids,
+                "answer": refined_answer,
+                "answer": answer,
+                "llm": self.llm,
+                "user_content": user_content,
+                "user_refine_content": user_refine_content
+            }
+
+        else:
+            result = {
+                "question": query,
+                "sources": sources,
+                "document_ids": document_ids,
+                "answer": answer,
+                "llm": self.llm,
+                "user_content": user_content,
+            }
+
         return result
 
 class ComparisonAgent:
