@@ -60,6 +60,8 @@ async def ping():
 @app.post("/stream")
 def stream(query: Query) -> StreamingResponse:
 
+    print(f'Query: {query.query}')
+
     constitucion1_agent = QueryAgent(embedding_model_name=CONFIG["embedding_model"],
                                 llm=CONFIG["chat_model"],
                                 temperature=CONFIG["temperature"],
@@ -188,7 +190,12 @@ def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, docum
                                     stream=True)
         for answer_piece in response_final["answer"]:
             yield f'{{"content" : "{answer_piece}"}}\n'
-    
+
+    else:
+
+        yield "\n\n**[FINAL RESPONSE]**\n"
+        yield f'{{"content" : ""}}\n'
+
     yield "\n\n**[END]**\n"
 
 def produce_answer(qe_result1, qe_result2, prompt, document1_id, document2_id):
@@ -227,7 +234,7 @@ def produce_answer(qe_result1, qe_result2, prompt, document1_id, document2_id):
                                     second_response=qe_result2['answer'],
                                     stream=False)
     
-    return response_final, sources_text_1, sources_text_2
+        return response_final, sources_text_1, sources_text_2
 
 
 @stub.function(

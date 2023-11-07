@@ -57,6 +57,8 @@ the differences of two constitutions.
 The first constitution is the current one, and the second one is a proposed one.
 Always refer to the first constitution as "{{document1_title}}" and the second one as "{{document2_title}}".
 
+If none of the constitutions are informative about the topic, you should indicate that.
+
 Please respond in {{language}}.
 """
 )

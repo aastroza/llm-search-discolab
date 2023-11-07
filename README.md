@@ -15,9 +15,9 @@ pip install -r requirements.txt
 curl --location 'https://aastroza--new-rag-discolab-api.modal.run/stream' \
 --header 'Content-Type: application/json' \
 --data '{
-    "query": "El banco central",
+    "query": "aborto",
     "document1_id": 1,
-    "document2_id": 2
+    "document2_id": 5
 }' \
 --no-buffer
 ```
