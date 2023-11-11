@@ -194,13 +194,13 @@ def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, docum
     else:
 
         yield "\n\n**[FINAL RESPONSE]**\n"
-        yield f'{{"content" : ""}}\n'
+        yield f'{{"content" : "Por favor intenta otra consulta, te recomendamos dar más contexto a tu pregunta."}}\n'
 
     yield "\n\n**[END]**\n"
 
 def produce_answer(qe_result1, qe_result2, prompt, document1_id, document2_id):
     
-    print(qe_result1)
+    #print(qe_result1)
     sources_idx_1 = sorted(set(re.findall(r'\[(\d)\]', qe_result1['answer'])))
     sources_text_1 = ''
     print(sources_idx_1)
@@ -211,6 +211,7 @@ def produce_answer(qe_result1, qe_result2, prompt, document1_id, document2_id):
 
     sources_idx_2 = sorted(set(re.findall(r'\[(\d)\]', qe_result2['answer'])))
     sources_text_2 = ''
+    print(sources_idx_2)
     if len(sources_idx_2) > 0:
         for idx in sources_idx_2:
             source = qe_result2["sources"][int(idx)-1]

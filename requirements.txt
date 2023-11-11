@@ -1,5 +1,5 @@
 python-dotenv
-openai
+openai==0.28.1
 pydantic
 ipython==8.16.1
 ipykernel

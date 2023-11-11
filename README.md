@@ -21,3 +21,13 @@ curl --location 'https://aastroza--new-rag-discolab-api.modal.run/stream' \
 }' \
 --no-buffer
 ```
+
+```
+curl --location 'https://aastroza--new-rag-discolab-api.modal.run/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+    "query": "¿Qué se dice sobre la igualdad de género?",
+    "document1_id": 1,
+    "document2_id": 2
+}'
+```
