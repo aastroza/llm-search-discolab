@@ -1,42 +1,33 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse
-from modal import asgi_app, Secret, Image, Stub
+from modal import asgi_app, Secret, Image, App
 from dotenv import load_dotenv; load_dotenv()
 import re
 
 from rag.generate import QueryAgent, ComparisonAgent
 from rag.prompts import DOCUMENT_QA_SYSTEM_PROMPT, FINAL_RESPONSE_SYSTEM_PROMPT_TEMPLATE
 from rag.config import MAX_CONTEXT_LENGTHS, CONFIG, CONSTITUCIONES
-from rag.magic import get_language
 
-# Creates the FastAPI web server.
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+def get_language(text: str) -> str:
+    return "spanish"
+
+app = App("new-rag-discolab")
+web_app = FastAPI()
 
 image = (
     Image.debian_slim()
     .pip_install(
-        "openai",
-        "langchain",
+        "openai==1.43.0",
         "python-dotenv",
-        "psycopg2-binary",
         "pgvector",
+        "psycopg2-binary",
         "jinja2",
-        "tiktoken",
-        "marvin==1.5.1",
-        "pydantic-settings"
+        "langchain_openai"
     )
 )
 
-stub = Stub("new-rag-discolab")
 
 class Query(BaseModel):
     query: str
@@ -53,11 +44,11 @@ class Reply(BaseModel):
     sources2: str
     answer_comparison: str
 
-@app.get("/ping")
-async def ping():
-    return "pong"
+# @app.get("/ping")
+# async def ping():
+#     return "pong"
 
-@app.post("/stream")
+@web_app.post("/stream")
 def stream(query: Query) -> StreamingResponse:
 
     print(f'Query: {query.query}')
@@ -94,53 +85,53 @@ def stream(query: Query) -> StreamingResponse:
                                                     document2_id=query.document2_id),
                             media_type="text/event-stream")
 
-@app.post("/chat")
-def stream(query: Query) -> Reply:
+# @app.post("/chat")
+# def stream(query: Query) -> Reply:
 
-    print(f'Query: {query.query}')
+#     print(f'Query: {query.query}')
 
-    constitucion1_agent = QueryAgent(embedding_model_name=CONFIG["embedding_model"],
-                                llm=CONFIG["chat_model"],
-                                temperature=CONFIG["temperature"],
-                                max_context_length=MAX_CONTEXT_LENGTHS[CONFIG["chat_model"]],
-                                system_content=DOCUMENT_QA_SYSTEM_PROMPT.render(language=get_language(query.query)),
-                                assistant_content="",
-                                constitucion_id=query.document1_id)
+#     constitucion1_agent = QueryAgent(embedding_model_name=CONFIG["embedding_model"],
+#                                 llm=CONFIG["chat_model"],
+#                                 temperature=CONFIG["temperature"],
+#                                 max_context_length=MAX_CONTEXT_LENGTHS[CONFIG["chat_model"]],
+#                                 system_content=DOCUMENT_QA_SYSTEM_PROMPT.render(language=get_language(query.query)),
+#                                 assistant_content="",
+#                                 constitucion_id=query.document1_id)
     
-    constitucion2_agent = QueryAgent(embedding_model_name=CONFIG["embedding_model"],
-                                llm=CONFIG["chat_model"],
-                                temperature=CONFIG["temperature"],
-                                max_context_length=MAX_CONTEXT_LENGTHS[CONFIG["chat_model"]],
-                                system_content=DOCUMENT_QA_SYSTEM_PROMPT.render(language=get_language(query.query)),
-                                assistant_content="",
-                                constitucion_id=query.document2_id)
+#     constitucion2_agent = QueryAgent(embedding_model_name=CONFIG["embedding_model"],
+#                                 llm=CONFIG["chat_model"],
+#                                 temperature=CONFIG["temperature"],
+#                                 max_context_length=MAX_CONTEXT_LENGTHS[CONFIG["chat_model"]],
+#                                 system_content=DOCUMENT_QA_SYSTEM_PROMPT.render(language=get_language(query.query)),
+#                                 assistant_content="",
+#                                 constitucion_id=query.document2_id)
     
-    result1 = constitucion1_agent(query=query.query,
-                                    num_chunks=3,
-                                    stream=False)
+#     result1 = constitucion1_agent(query=query.query,
+#                                     num_chunks=3,
+#                                     stream=False)
 
-    print(f'First answer: {result1["answer"]}')
+#     print(f'First answer: {result1["answer"]}')
 
-    result2 = constitucion2_agent(query=query.query,
-                                    num_chunks=3,
-                                    stream=False)
+#     result2 = constitucion2_agent(query=query.query,
+#                                     num_chunks=3,
+#                                     stream=False)
 
-    print(f'Second answer: {result2["answer"]}')
+#     print(f'Second answer: {result2["answer"]}')
 
-    result3, sources1, sources2 = produce_answer(qe_result1 = result1,
-                                                qe_result2 = result2,
-                                                prompt=query.query,
-                                                document1_id=query.document1_id,
-                                                document2_id=query.document2_id)
+#     result3, sources1, sources2 = produce_answer(qe_result1 = result1,
+#                                                 qe_result2 = result2,
+#                                                 prompt=query.query,
+#                                                 document1_id=query.document1_id,
+#                                                 document2_id=query.document2_id)
                                                     
-    return Reply(query=query.query,
-                document1_id=query.document1_id,
-                document2_id=query.document2_id,
-                answer1=result1["answer"],
-                answer2=result2["answer"],
-                sources1=sources1,
-                sources2=sources2,
-                answer_comparison=result3["answer"])
+#     return Reply(query=query.query,
+#                 document1_id=query.document1_id,
+#                 document2_id=query.document2_id,
+#                 answer1=result1["answer"],
+#                 answer2=result2["answer"],
+#                 sources1=sources1,
+#                 sources2=sources2,
+#                 answer_comparison=result3["answer"])
 
 def produce_streaming_answer(qe_result1, qe_result2, prompt, document1_id, document2_id):
     
@@ -238,12 +229,7 @@ def produce_answer(qe_result1, qe_result2, prompt, document1_id, document2_id):
         return response_final, sources_text_1, sources_text_2
 
 
-@stub.function(
-    image=image,
-    secret=Secret.from_name("new-discolab"),
-    keep_warm=1,
-)
-
+@app.function(image=image, secrets=[Secret.from_dotenv()])
 @asgi_app()
 def api():
-    return app
+    return web_app

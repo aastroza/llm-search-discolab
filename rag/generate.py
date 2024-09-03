@@ -2,13 +2,20 @@ import psycopg2
 from pgvector.psycopg2 import register_vector
 import os
 import numpy as np
-import openai
+from openai import OpenAI
+
 import time
 import re
+
+from dotenv import load_dotenv
 
 from rag.embed import get_embedding_model
 from rag.prompts import DOCUMENT_QA_USER_PROMPT_TEMPLATE, DOCUMENT_QA_REFINE_USER_PROMPT_TEMPLATE, FINAL_RESPONSE_USER_PROMPT_TEMPLATE
 from rag.config import CONFIG
+
+load_dotenv()
+
+client = OpenAI()
 
 def get_sources_and_context(query, embedding_model, num_chunks=3, id_constitucion=1):
     embedding = np.array(embedding_model.embed_query(query))
@@ -28,8 +35,10 @@ def get_sources_and_context(query, embedding_model, num_chunks=3, id_constitucio
 
 def response_stream(response):
     for chunk in response:
-        if "content" in chunk["choices"][0]["delta"].keys():
-            yield chunk["choices"][0]["delta"]["content"]
+        #print(chunk)
+        if hasattr(chunk.choices[0].delta, 'content'):
+            if chunk.choices[0].delta.content is not None:
+                yield chunk.choices[0].delta.content
 
 def prepare_response(response, stream):
     if stream:
@@ -51,7 +60,7 @@ def generate_response(
     retry_count = 0
     while retry_count < max_retries:
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model=llm,
                 temperature=temperature,
                 stream=stream,
@@ -157,7 +166,7 @@ class ComparisonAgent:
     def __init__(
         self,
         embedding_model_name="text-embedding-ada-002",
-        llm="gpt-3.5-turbo",
+        llm="gpt-4o-mini",
         temperature=0.0,
         max_context_length=4096,
         system_content="",

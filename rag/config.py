@@ -4,12 +4,13 @@ EMBEDDING_DIMENSIONS = {
 }
 MAX_CONTEXT_LENGTHS = {
     "gpt-4": 8192,
+    "gpt-4o-mini": 8192,
     "gpt-3.5-turbo": 4096,
     "gpt-3.5-turbo-16k": 16384
 }
 
 CONFIG = {
-    "chat_model": "gpt-3.5-turbo",
+    "chat_model": "gpt-4o-mini",
     "embedding_model": "text-embedding-ada-002",
     "temperature": 0.0,
     "chunk_size": 1024,
@@ -29,5 +30,5 @@ CONSTITUCIONES = {
     "5": "Propuesta Constitucional 2023"
 }
 
-MARVIN_MODEL_NAME = 'openai/gpt-3.5-turbo'
+MARVIN_MODEL_NAME = 'openai/gpt-4o-mini'
 MARVIN_MODEL_TEMPERATURE = 0
